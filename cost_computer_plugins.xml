@@ -1,0 +1,6 @@
+<library path="lib/libhector_waypoint_order">
+  <class type="hector_waypoint_order::PathCostComputer"
+         base_class_type="hector_waypoint_order::CostComputerBase">
+    <description>Compute costs based on path, if planner does not compute any costs, the path length is used.</description>
+  </class>
+</library>

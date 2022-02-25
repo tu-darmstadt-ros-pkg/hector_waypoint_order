@@ -1,0 +1,121 @@
+cmake_minimum_required(VERSION 3.1)
+project(hector_waypoint_order)
+
+set(CMAKE_CXX_STANDARD 14)
+
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  nav_msgs
+  pluginlib
+  roscpp
+  )
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+
+
+################################################
+## Declare ROS dynamic reconfigure parameters ##
+################################################
+
+## To declare and build dynamic reconfigure parameters within this
+## package, follow these steps:
+## * In the file package.xml:
+##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
+## * In this file (CMakeLists.txt):
+##   * add "dynamic_reconfigure" to
+##     find_package(catkin REQUIRED COMPONENTS ...)
+##   * uncomment the "generate_dynamic_reconfigure_options" section below
+##     and list every .cfg file to be processed
+
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
+
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS geometry_msgs nav_msgs pluginlib roscpp
+  #  DEPENDS system_lib
+)
+
+###########
+## Build ##
+###########
+
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+
+set(HEADER_FILES
+
+  include/hector_waypoint_order/waypoint_order_computer_base.h
+  include/hector_waypoint_order/utils.h
+
+  include/hector_waypoint_order/cost_computation/cost_computer_base.h
+  include/hector_waypoint_order/cost_computation/path_cost_computer.h
+
+  include/hector_waypoint_order/cost_computation/path_planner/path_planner_base.h
+
+  )
+
+set(SOURCES
+  src/waypoint_order_computer_base.cpp
+
+  src/cost_computation/cost_computer_base.cpp
+  src/cost_computation/path_cost_computer.cpp
+
+  src/cost_computation/path_planner/path_planner_base.cpp
+  )
+
+
+## Declare a C++ library
+add_library(${PROJECT_NAME} ${HEADER_FILES} ${SOURCES})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+
+#############
+## Install ##
+#############
+
+#install(DIRECTORY
+#  config
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#  )
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
+# Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+  )
+
+#############
+## Testing ##
+#############
+
