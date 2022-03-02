@@ -62,5 +62,6 @@
   <export>
     <!-- Other tools can request additional information be placed here -->
     <hector_waypoint_order plugin="${prefix}/cost_computer_plugins.xml" />
+    <hector_waypoint_order plugin="${prefix}/order_computer_plugins.xml" />
   </export>
 </package>

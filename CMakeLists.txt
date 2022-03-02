@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS graph)
 
 
 ################################################
@@ -50,7 +51,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS geometry_msgs nav_msgs pluginlib roscpp
-  #  DEPENDS system_lib
+  DEPENDS Boost
 )
 
 ###########
@@ -62,6 +63,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 
@@ -75,6 +77,7 @@ set(HEADER_FILES
 
   include/hector_waypoint_order/cost_computation/path_planner/path_planner_base.h
 
+  include/hector_waypoint_order/tsp_solver/boost_tsp_solver.h
   )
 
 set(SOURCES
@@ -84,13 +87,15 @@ set(SOURCES
   src/cost_computation/path_cost_computer.cpp
 
   src/cost_computation/path_planner/path_planner_base.cpp
+
+  src/tsp_solver/boost_tsp_solver.cpp
   )
 
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME} ${HEADER_FILES} ${SOURCES})
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 
 #############
@@ -115,7 +120,19 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
   )
 
+
+
+
 #############
 ## Testing ##
 #############
+if (CATKIN_ENABLE_TESTING)
 
+  find_package(rostest REQUIRED)
+  include_directories(${rostest_INCLUDE_DIRS})
+
+  ## Add gtest based cpp test target and link libraries
+  add_rostest_gtest(test_boost_tsp_solver test/test_boost_tsp_solver.test test/test_boost_tsp_solver.cpp)
+  target_link_libraries(test_boost_tsp_solver ${PROJECT_NAME} ${rostest_LIBRARIES})
+
+endif ()

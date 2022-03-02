@@ -1,0 +1,6 @@
+<library path="lib/libhector_waypoint_order">
+  <class type="hector_waypoint_order::BoostTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Uses the boost graph library to solve the TSP for computing the waypoint order.</description>
+  </class>
+</library>

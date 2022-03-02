@@ -13,7 +13,21 @@ class WaypointOrderComputerBase
 {
 public:
 
-  std::vector<geometry_msgs::PoseStamped> computeWaypointOrder(const CostMap& cost_map);
+  virtual void initialize(std::vector<geometry_msgs::PoseStamped> waypoints_unordered, CostMap cost_map);
+
+  virtual std::vector<geometry_msgs::PoseStamped> computeWaypointOrder() = 0;
+
+  double getPathCosts();
+
+protected:
+
+  std::vector<geometry_msgs::PoseStamped> waypoints_unordered_;
+
+  CostMap cost_map_;
+
+  std::vector<geometry_msgs::PoseStamped> path_;
+  double path_costs_;
+
 };
 } // end namespace hector_waypoint_order
 
