@@ -8,6 +8,10 @@
 namespace hector_waypoint_order
 {
 
+PathCostComputer::PathCostComputer() : CostComputerBase("PathCostComputer")
+{
+}
+
 void PathCostComputer::initialize(ros::NodeHandle& nh)
 {
   CostComputerBase::initialize(nh);
@@ -33,7 +37,6 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
   {
     auto start_pose = waypoints[i];
 
-    // Note: are start_pose->start_pose entries with costs 0 required? Or depending on solver?
     // add entry of start_pose to itself with 0
     cost_map.emplace(std::make_pair(start_pose, start_pose), 0);
 
@@ -53,6 +56,10 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
         // if planner could not plan a path between start and target pose, set costs to -1
         // (not to inf/DBL_MAX to distinct between long but (probably) existing paths and non-existing path)
         costs = -1;
+
+        path.poses.clear();
+        path.poses.push_back(start_pose);
+        path.poses.push_back(target_pose);
       }
 
       // if costs were not computed by path planner, compute them as path length
@@ -61,12 +68,18 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
         costs = computePathLength(path.poses);
       }
 
+      // add paths to map
+      paths_.emplace(std::make_pair(start_pose, target_pose), path);
+
+      // reverse path for target -> start
+      std::reverse(path.poses.begin(), path.poses.end());
+      paths_.emplace(std::make_pair(target_pose, start_pose), path);
+
       // add costs for both directions to cost map
       cost_map.emplace(std::make_pair(start_pose, target_pose), costs);
       cost_map.emplace(std::make_pair(target_pose, start_pose), costs);
     }
   }
-
 
   return cost_map;
 }

@@ -16,7 +16,7 @@ class PathCostComputer : public CostComputerBase
 {
 public:
 
-  PathCostComputer() = default;
+  PathCostComputer();
 
   void initialize(ros::NodeHandle& nh) override;
 

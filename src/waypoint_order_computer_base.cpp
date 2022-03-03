@@ -18,7 +18,14 @@ double WaypointOrderComputerBase::getPathCosts()
   {
     for(unsigned int i = 1; i < path_.size(); ++i)
     {
-      path_costs_ += cost_map_.at({path_[i-1], path_[i]});
+      auto costs = cost_map_.at({path_[i-1], path_[i]});
+      if(costs == -1)
+      {
+        // TODO how to handle path_costs -1 in getPathCosts?
+        path_costs_ = DBL_MAX;
+        break;
+      }
+      path_costs_ += costs;
     }
   }
 

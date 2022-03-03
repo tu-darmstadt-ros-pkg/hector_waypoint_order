@@ -16,6 +16,8 @@ public:
 
   CostComputerBase() = default;
 
+  explicit CostComputerBase(std::string plugin_name);
+
   virtual void initialize(ros::NodeHandle& nh);
 
   /**
@@ -29,9 +31,14 @@ public:
    */
   virtual CostMap computeCosts(std::vector<geometry_msgs::PoseStamped> waypoints) = 0;
 
+  virtual const PathMap& getPaths();
 
 protected:
   ros::NodeHandle pnh_;
+
+  const std::string plugin_name_;
+
+  PathMap paths_;
 };
 } // end namespace hector_waypoint_order
 

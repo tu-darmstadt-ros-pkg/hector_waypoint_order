@@ -3,6 +3,7 @@
 
 #include <map>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 
 namespace hector_waypoint_order
 {
@@ -78,9 +79,11 @@ struct PosePairLessComparator
 };
 } // end namespace utils
 
-// TODO costmap: pair key or nested map?
-//using CostMap = std::map<geometry_msgs::PoseStamped, std::map<geometry_msgs::PoseStamped, double, utils::PoseLessComparator>, utils::PoseLessComparator>;
+
 using CostMap = std::map<utils::PosePair, double, utils::PosePairLessComparator>;
+
+using PathMap = std::map<utils::PosePair, nav_msgs::Path, utils::PosePairLessComparator>;
+
 } // end namespace hector_waypoint_order
 
 #endif //HECTOR_WAYPOINT_ORDER_UTILS_H
