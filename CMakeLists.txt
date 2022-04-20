@@ -81,6 +81,12 @@ set(HEADER_FILES
   include/hector_waypoint_order/cost_computation/path_planner/path_planner_base.h
 
   include/hector_waypoint_order/tsp_solver/boost_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/boost_and_simulated_annealing_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/brute_force_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/greedy_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/greedy_and_simulated_annealing_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/simulated_annealing_tsp_solver.h
+
   )
 
 set(SOURCES
@@ -92,6 +98,11 @@ set(SOURCES
   src/cost_computation/path_planner/path_planner_base.cpp
 
   src/tsp_solver/boost_tsp_solver.cpp
+  src/tsp_solver/boost_and_simulated_annealing_tsp_solver.cpp
+  src/tsp_solver/brute_force_tsp_solver.cpp
+  src/tsp_solver/greedy_tsp_solver.cpp
+  src/tsp_solver/greedy_and_simulated_annealing_tsp_solver.cpp
+  src/tsp_solver/simulated_annealing_tsp_solver.cpp
   )
 
 
@@ -122,8 +133,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
   )
-
-
 
 
 #############

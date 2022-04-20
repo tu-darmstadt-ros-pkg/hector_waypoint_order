@@ -3,4 +3,32 @@
          base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
     <description>Uses the boost graph library to solve the TSP for computing the waypoint order.</description>
   </class>
+  <class type="hector_waypoint_order::GreedyTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Greedy solver to a TSP, always chooses the nearest waypoint that is not in path yet.
+    </description>
+  </class>
+  <class type="hector_waypoint_order::BruteForceTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Brute force solver to a TSP, try every permutation to find the shortest path (only use for few cities
+      or with enough time, as (num_waypoints)! permutations exist!).
+    </description>
+  </class>
+  <class type="hector_waypoint_order::SimulatedAnnealingTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Uses simulated annealing to solve the TSP for computing the waypoint order.</description>
+  </class>
+  <class type="hector_waypoint_order::BoostAndSimulatedAnnealingTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Uses the boost graph library to solve the TSP and uses this solution as initial path for simulated
+      annealing to improve the boost solution for computing the waypoint order.
+    </description>
+  </class>
+  <class type="hector_waypoint_order::GreedyAndSimulatedAnnealingTspSolver"
+         base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
+    <description>Uses the greedy solver and uses its solution as initial path for simulated
+      annealing to improve the greedy solution for computing the waypoint order.
+    </description>
+  </class>
+
 </library>
