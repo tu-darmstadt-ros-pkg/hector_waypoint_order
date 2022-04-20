@@ -35,6 +35,11 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
 
   for (unsigned int i = 0; i < waypoints.size(); i++)
   {
+    if(!ros::ok())
+    {
+      break;
+    }
+
     auto start_pose = waypoints[i];
 
     // add entry of start_pose to itself with 0
@@ -42,6 +47,11 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
 
     for (unsigned int j = i + 1; j < waypoints.size(); j++)
     {
+      if(!ros::ok())
+      {
+        break;
+      }
+
       auto target_pose = waypoints[j];
 
       // TODO maybe do not compute costs between all pairs of waypoints
@@ -78,6 +88,11 @@ CostMap PathCostComputer::computeCosts(std::vector<geometry_msgs::PoseStamped> w
       // add costs for both directions to cost map
       cost_map.emplace(std::make_pair(start_pose, target_pose), costs);
       cost_map.emplace(std::make_pair(target_pose, start_pose), costs);
+
+      // print progress
+      int progress = static_cast<int>(std::round(cost_map.size() * 100.0 / (waypoints.size() * waypoints.size())));
+      std::cout << "Compute path costs: " << progress << "%.\r";
+      std::cout.flush();
     }
   }
 

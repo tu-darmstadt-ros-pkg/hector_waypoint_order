@@ -10,6 +10,14 @@ namespace hector_waypoint_order
 namespace utils
 {
 
+static long fact(int n)
+{
+  if (n == 0 || n == 1)
+    return 1;
+  return n * fact(n - 1);
+}
+
+
 using PosePair = std::pair<geometry_msgs::PoseStamped, geometry_msgs::PoseStamped>;
 
 /**
@@ -77,13 +85,35 @@ struct PosePairLessComparator
     }
   }
 };
+
+
+struct PoseVectorLessComparator
+{
+  bool operator()(const std::vector<geometry_msgs::PoseStamped>& lhs,
+                  const std::vector<geometry_msgs::PoseStamped>& rhs) const
+  {
+    for (int i = 0; i < std::min(lhs.size(), rhs.size()); i++)
+    {
+      auto result = compare(lhs[i], rhs[i]);
+
+      if (result != 0)
+      {
+        // elements are not equal
+        return result < 0;
+      }
+      // if result == 0: elements are equal, continue with next element
+    }
+
+    // if all elements up to std::min(lhs.size(), rhs.size()) have been equal (= one is prefix of other), sort the one with less elements first
+    return lhs.size() < rhs.size();
+  }
+};
 } // end namespace utils
 
 
 using CostMap = std::map<utils::PosePair, double, utils::PosePairLessComparator>;
 
 using PathMap = std::map<utils::PosePair, nav_msgs::Path, utils::PosePairLessComparator>;
-
 } // end namespace hector_waypoint_order
 
 #endif //HECTOR_WAYPOINT_ORDER_UTILS_H

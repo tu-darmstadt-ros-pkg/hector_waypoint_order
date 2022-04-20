@@ -70,7 +70,7 @@ include_directories(
 set(HEADER_FILES
 
   include/hector_waypoint_order/waypoint_order_computer_base.h
-  include/hector_waypoint_order/utils.h
+  include/hector_waypoint_order/utils/utils.h
 
   include/hector_waypoint_order/cost_computation/cost_computer_base.h
   include/hector_waypoint_order/cost_computation/path_cost_computer.h

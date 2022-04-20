@@ -1,7 +1,7 @@
 #ifndef HECTOR_WAYPOINT_ORDER_COST_COMPUTER_BASE_H
 #define HECTOR_WAYPOINT_ORDER_COST_COMPUTER_BASE_H
 
-#include "hector_waypoint_order/utils.h"
+#include "hector_waypoint_order/utils/utils.h"
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
