@@ -7,9 +7,10 @@
 namespace hector_waypoint_order
 {
 
-void BoostTspSolver::initialize(std::vector<geometry_msgs::PoseStamped> waypoints_unordered, CostMap cost_map)
+void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
+                                CostMap cost_map)
 {
-  WaypointOrderComputerBase::initialize(waypoints_unordered, cost_map);
+  WaypointOrderComputerBase::initialize(nh, waypoints_unordered, cost_map);
 
   // add all vertices
   for (int i = 0; i < waypoints_unordered_.size(); ++i)
@@ -32,7 +33,9 @@ void BoostTspSolver::initialize(std::vector<geometry_msgs::PoseStamped> waypoint
 
       if (costs == -1)
       {
-        // TODO non computable costs = DBL_MAX ok?
+        // Note: setting costs for non-computable paths to DBL_MAX results in discarding the edge in dijkstra_shortest_paths
+        //  as here an maximum value for distances is set whose default is type::max.
+        //  Another possibility would be to check (here or in cost computer) if this waypoint can be discarded completely due to unreachability.
         costs = DBL_MAX;
       }
 
@@ -50,6 +53,10 @@ std::vector<geometry_msgs::PoseStamped> BoostTspSolver::computeWaypointOrder()
   std::vector<Graph::vertex_descriptor> tsp_path(num_vertices(graph_));
 
   // execute tsp solver
+  // TODO metric_tsp_approx_tour can also get an element of the graph as start,
+  //  in the current version the first element in the graph is used as start.
+  //  Maybe add option to give pass first point as argument (but then for all order computer)
+  //  (but with default which selects first or random as start).
   metric_tsp_approx_tour(graph_, back_inserter(tsp_path));
 
 
@@ -60,7 +67,6 @@ std::vector<geometry_msgs::PoseStamped> BoostTspSolver::computeWaypointOrder()
   // convert tsp_path to vector of geometry_msgs::PoseStamped
   for (Graph::vertex_descriptor vertex_descr: tsp_path)
   {
-    // TODO: is this check required?
     if (vertex_descr != Graph::null_vertex())
     {
       auto waypoint = waypoints_unordered_.at(vertex_index_map[vertex_descr]);
@@ -68,6 +74,8 @@ std::vector<geometry_msgs::PoseStamped> BoostTspSolver::computeWaypointOrder()
       path_.push_back(waypoint);
     }
   }
+
+  publishPath();
 
   return path_;
 }

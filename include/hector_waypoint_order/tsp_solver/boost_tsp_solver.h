@@ -12,7 +12,8 @@ class BoostTspSolver : public WaypointOrderComputerBase
 {
 public:
 
-  void initialize(std::vector<geometry_msgs::PoseStamped> waypoints_unordered, CostMap cost_map) override;
+  void initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
+                  CostMap cost_map) override;
 
   std::vector<geometry_msgs::PoseStamped> computeWaypointOrder() override;
 
@@ -31,8 +32,6 @@ private:
 
 
   Graph graph_;
-
-
 };
 } // end namespace hector_waypoint_order
 
