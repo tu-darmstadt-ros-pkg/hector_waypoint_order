@@ -83,7 +83,8 @@ TEST_F(BoostTspSolverTest, SmallTest)
 {
   BoostTspSolver solver;
 
-  solver.initialize(waypoints_unordered_, cost_map_);
+  ros::NodeHandle nh;
+  solver.initialize(nh, waypoints_unordered_, cost_map_);
 
   auto result = solver.computeWaypointOrder();
 

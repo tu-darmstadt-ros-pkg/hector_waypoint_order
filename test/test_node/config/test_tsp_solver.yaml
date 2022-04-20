@@ -1,0 +1,20 @@
+
+
+waypoint_order_computer_plugin: hector_waypoint_order::SimulatedAnnealingTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::BoostTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::BoostAndSimulatedAnnealingTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::GreedyTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::GreedyAndSimulatedAnnealingTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::BruteForceTspSolver
+
+
+publish_path: true
+
+#tsp_file_name: "5_tsp_waypoints_costmap.bag"
+#tsp_file_name: "9_tsp_waypoints_costmap.bag"
+#tsp_file_name: "14_tsp_waypoints_costmap.bag"
+tsp_file_name: "23_tsp_waypoints_costmap.bag"
+#tsp_file_name: "66_tsp_waypoints_costmap.bag"
+#tsp_file_name: "97_tsp_waypoints_costmap.bag"
+#tsp_file_name: "149_tsp_waypoints_costmap.bag"
+#tsp_file_name: "207_tsp_waypoints_costmap.bag"

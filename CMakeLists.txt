@@ -148,3 +148,16 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_boost_tsp_solver ${PROJECT_NAME} ${rostest_LIBRARIES})
 
 endif ()
+
+
+## Test node (no gtest), especially used to test and evaluate different solvers.
+
+option(TEST_TSP_SOLVERS "Build executable for testing the tsp solvers" ON) # TODO set TEST_TSP_SOLVERS to OFF
+
+if (TEST_TSP_SOLVERS)
+  ## Declare a C++ executable
+  add_executable(test_tsp_solver_node test/test_node/test_tsp_solver_node.cpp)
+  add_dependencies(test_tsp_solver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(test_tsp_solver_node ${PROJECT_NAME})
+
+endif ()
