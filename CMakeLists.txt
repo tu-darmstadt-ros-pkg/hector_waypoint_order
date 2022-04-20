@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   pluginlib
   roscpp
+  message_generation
+  rosbag
+  visualization_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -19,24 +22,23 @@ find_package(Boost REQUIRED COMPONENTS graph)
 
 
 ################################################
-## Declare ROS dynamic reconfigure parameters ##
+## Declare ROS messages, services and actions ##
 ################################################
 
-## To declare and build dynamic reconfigure parameters within this
-## package, follow these steps:
-## * In the file package.xml:
-##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
-## * In this file (CMakeLists.txt):
-##   * add "dynamic_reconfigure" to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * uncomment the "generate_dynamic_reconfigure_options" section below
-##     and list every .cfg file to be processed
+## Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  CostMapEntry.msg
+  Costmap.msg
+)
 
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+  nav_msgs
+)
+
 
 ###################################
 ## catkin specific configuration ##
@@ -50,7 +52,7 @@ find_package(Boost REQUIRED COMPONENTS graph)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS geometry_msgs nav_msgs pluginlib roscpp
+  CATKIN_DEPENDS geometry_msgs nav_msgs pluginlib roscpp message_runtime rosbag visualization_msgs
   DEPENDS Boost
 )
 
@@ -71,6 +73,7 @@ set(HEADER_FILES
 
   include/hector_waypoint_order/waypoint_order_computer_base.h
   include/hector_waypoint_order/utils/utils.h
+  include/hector_waypoint_order/utils/file_utils.h
 
   include/hector_waypoint_order/cost_computation/cost_computer_base.h
   include/hector_waypoint_order/cost_computation/path_cost_computer.h

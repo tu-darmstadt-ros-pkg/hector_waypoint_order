@@ -1,0 +1,5 @@
+
+geometry_msgs/PoseStamped first_pose
+geometry_msgs/PoseStamped second_pose
+
+float64 costs
