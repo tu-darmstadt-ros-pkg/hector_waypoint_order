@@ -7,6 +7,8 @@ waypoint_order_computer_plugin: hector_waypoint_order::SimulatedAnnealingTspSolv
 #waypoint_order_computer_plugin: hector_waypoint_order::GreedyAndSimulatedAnnealingTspSolver
 #waypoint_order_computer_plugin: hector_waypoint_order::BruteForceTspSolver
 
+# only used by simulated annealing: whether all mutators generate a neighbor and the best is chosen or if mutator is selected probabilistically
+use_best_mutator: true
 
 publish_path: true
 

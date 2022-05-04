@@ -17,8 +17,6 @@ void SimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
 {
   WaypointOrderComputerBase::initialize(nh, waypoints_unordered, cost_map);
 
-  num_waypoints_ = static_cast<int>(waypoints_unordered_.size());
-
   // set initial state (this can be overwritten by setInitialPath)
   current_path_ = waypoints_unordered_;
   current_path_.push_back(current_path_[0]);
@@ -44,6 +42,14 @@ void SimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
     current_path_pub_ = nh_.advertise<nav_msgs::Path>("simulated_annealing_current_path", 1, true);
     current_path_msg_.header.frame_id = current_path_[0].header.frame_id;
   }
+
+  // add mutators to vector
+  mutators_[MOVE_NODE] = &SimulatedAnnealingTspSolver::moveNode;
+  mutators_[SWAP_2_NODES] = &SimulatedAnnealingTspSolver::swap2Nodes;
+  mutators_[SWAP_2_EDGES] = &SimulatedAnnealingTspSolver::swap2Edges;
+  mutators_[SWAP_3_EDGES] = &SimulatedAnnealingTspSolver::swap3Edges;
+
+  use_best_mutator_ = nh_.param("use_best_mutator", true);
 }
 
 
@@ -74,9 +80,7 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
   while (step < num_steps)
   {
     // select neighbor and compute path costs of it
-    pickRandomNeighbor();
-
-    neighbor_path_costs = computePathCosts(neighbor_path_);
+    neighbor_path_costs = pickRandomNeighbor();
 
     // compute acceptance probability
     double probability_accept_neighbor = computeProbabilityForAcceptingNeighbor(current_path_costs,
@@ -88,7 +92,7 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
       // TEMPORARY print
       ROS_INFO_STREAM(
         "Accepted neighbor path costs: " << neighbor_path_costs << ", current path costs: " << current_path_costs
-                                         << ", probability: " << probability_accept_neighbor);
+                                         << ", probability: " << probability_accept_neighbor << ", used mutator: " << used_mutator_);
 
       current_path_ = neighbor_path_;
       current_path_costs = neighbor_path_costs;
@@ -129,20 +133,20 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
 
   // TEMPORARY statistics print
   ROS_INFO_STREAM("Generated mutators:\n"
-                    << "swap nodes:   " << mutator_statistics_[0] / sum_generated << "%\n"
-                    << "swap 2 edges: " << mutator_statistics_[1] / sum_generated << "%\n"
-                    << "swap 3 edges: " << mutator_statistics_[2] / sum_generated << "%\n"
-                    << "move node:    " << mutator_statistics_[0] / sum_generated << "%\n");
+                    << "move node:    " << mutator_statistics_[MOVE_NODE] / sum_generated << "%\n"
+                    << "swap 2 nodes: " << mutator_statistics_[SWAP_2_NODES] / sum_generated << "%\n"
+                    << "swap 2 edges: " << mutator_statistics_[SWAP_2_EDGES] / sum_generated << "%\n"
+                    << "swap 3 edges: " << mutator_statistics_[SWAP_3_EDGES] / sum_generated << "%\n");
 
   double sum_accepted = std::accumulate(std::begin(mutator_accepted_statistics_),
                                         std::end(mutator_accepted_statistics_), 0);
 
   // TEMPORARY statistics print
   ROS_INFO_STREAM("Accepted neighbors with mutator:\n"
-                    << "swap nodes:   " << mutator_accepted_statistics_[0] / sum_accepted << "%\n"
-                    << "swap 2 edges: " << mutator_accepted_statistics_[1] / sum_accepted << "%\n"
-                    << "swap 3 edges: " << mutator_accepted_statistics_[2] / sum_accepted << "%\n"
-                    << "move node:    " << mutator_accepted_statistics_[0] / sum_accepted << "%\n");
+                    << "move node:    " << mutator_accepted_statistics_[MOVE_NODE] / sum_accepted << "%\n"
+                    << "swap 2 nodes: " << mutator_accepted_statistics_[SWAP_2_NODES] / sum_accepted << "%\n"
+                    << "swap 2 edges: " << mutator_accepted_statistics_[SWAP_2_EDGES] / sum_accepted << "%\n"
+                    << "swap 3 edges: " << mutator_accepted_statistics_[SWAP_3_EDGES] / sum_accepted << "%\n");
 
 
   // path was set in loop as best ever seen solution
@@ -161,46 +165,80 @@ void SimulatedAnnealingTspSolver::setInitialPath(std::vector<geometry_msgs::Pose
 }
 
 
-void SimulatedAnnealingTspSolver::pickRandomNeighbor()
+double SimulatedAnnealingTspSolver::pickRandomNeighbor()
 {
-  // set neighbor to current path
-  neighbor_path_ = current_path_;
+  std::vector<geometry_msgs::PoseStamped> neighbor;
+  double neighbor_costs;
 
-  // mutate neighbor_path using different strategies
-  // TODO evaluate to find appropriate probabilities for mutator strategies (parameter server?)
-  double prob_swap_nodes = 0.25;
-  double prob_swap_2_edges = 0.25;
-  double prob_swap_3_edges = 0.25;
-  double prob_move_node = 0.25;
+  if (use_best_mutator_)
+  {
+    neighbor_costs = DBL_MAX;
 
-  auto random = probability_dis_(probability_gen_);
-  if (random < prob_swap_nodes)
-  {
-    used_mutator_ = 0;
-    swap2Nodes();
-  }
-  else if (random < prob_swap_nodes + prob_swap_2_edges)
-  {
-    used_mutator_ = 1;
-    swapNEdges(2);
-  }
-  else if (random < prob_swap_nodes + prob_swap_2_edges + prob_swap_3_edges)
-  {
-    used_mutator_ = 2;
-    swapNEdges(3);
+    std::vector<geometry_msgs::PoseStamped> candidate;
+    double candidate_costs;
+
+    for (auto& mutator: mutators_)
+    {
+      candidate = mutator.second(*this);
+      candidate_costs = computePathCosts(candidate);
+
+      if (candidate_costs < neighbor_costs)
+      {
+        used_mutator_ = mutator.first;
+        neighbor = candidate;
+        neighbor_costs = candidate_costs;
+      }
+    }
   }
   else
   {
-    used_mutator_ = 3;
+    // mutate neighbor_path using different strategies
 
-    moveNode();
+    // TODO evaluate to find appropriate probabilities for mutator strategies (parameter server?)
+    double prob_move_node = 0.25;
+    double prob_swap_nodes = 0.25;
+    double prob_swap_2_edges = 0.25;
+    double prob_swap_3_edges = 0.25;
+
+    std::map<int, std::pair<double, double>> probabilities;
+    probabilities[MOVE_NODE] = std::make_pair(0, prob_move_node);
+    probabilities[SWAP_2_NODES] = std::make_pair(probabilities[MOVE_NODE].second,
+                                                 probabilities[MOVE_NODE].second + prob_swap_nodes);
+    probabilities[SWAP_2_EDGES] = std::make_pair(probabilities[SWAP_2_NODES].second,
+                                                 probabilities[SWAP_2_NODES].second + prob_swap_2_edges);
+    probabilities[SWAP_3_EDGES] = std::make_pair(probabilities[SWAP_2_EDGES].second,
+                                                 probabilities[SWAP_2_EDGES].second + prob_swap_3_edges);
+
+    if(probabilities[SWAP_3_EDGES].second != 1)
+    {
+      throw std::invalid_argument("TSP Solver Simulated Annealing: Mutator probabilities do not sum up to 1!");
+    }
+
+    auto random = probability_dis_(probability_gen_);
+
+    for (auto& prob: probabilities)
+    {
+      if (prob.second.first <= random && random <= prob.second.second)
+      {
+        used_mutator_ = prob.first;
+        neighbor = mutators_[prob.first](*this);
+        neighbor_costs = computePathCosts(neighbor);
+        break;
+      }
+    }
   }
+
   ++mutator_statistics_[used_mutator_];
+
+  neighbor_path_ = neighbor;
+  return neighbor_costs;
 }
 
 
-void SimulatedAnnealingTspSolver::swap2Nodes()
+std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap2Nodes()
 {
+  std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
+
   bool indices_valid;
   int idx1, idx2;
   do
@@ -216,10 +254,10 @@ void SimulatedAnnealingTspSolver::swap2Nodes()
     }
 
     // get new edges after swap
-    utils::PosePair new_edges[4] = {{neighbor_path_[idx2 - 1], neighbor_path_[idx1]},
-                                    {neighbor_path_[idx1],     neighbor_path_[idx2 + 1]},
-                                    {neighbor_path_[idx1 - 1], neighbor_path_[idx2]},
-                                    {neighbor_path_[idx2],     neighbor_path_[idx1 + 1]}};
+    utils::PosePair new_edges[4] = {{neighbor[idx2 - 1], neighbor[idx1]},
+                                    {neighbor[idx1],     neighbor[idx2 + 1]},
+                                    {neighbor[idx1 - 1], neighbor[idx2]},
+                                    {neighbor[idx2],     neighbor[idx1 + 1]}};
 
     indices_valid = true;
     for (auto& new_edge: new_edges)
@@ -234,11 +272,15 @@ void SimulatedAnnealingTspSolver::swap2Nodes()
   } while (!indices_valid);
 
   // swap in order to generate neighbor
-  std::swap(neighbor_path_[idx1], neighbor_path_[idx2]);
+  std::swap(neighbor[idx1], neighbor[idx2]);
+
+  return neighbor;
 }
 
-void SimulatedAnnealingTspSolver::swapNEdges(int n)
+std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swapNEdges(int n)
 {
+
+  std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
 
   bool indices_valid;
   std::set<int> edge_end_node_idx;
@@ -261,42 +303,58 @@ void SimulatedAnnealingTspSolver::swapNEdges(int n)
 
 
     // reverse path parts, defined by generated edge_end_nodes
-    auto start_it = neighbor_path_.begin();
+    auto start_it = neighbor.begin();
     for (auto& edge_end_idx: edge_end_node_idx)
     {
       // do not reverse first block
       if (edge_end_idx != *edge_end_node_idx.begin())
       {
         // reverse from last edge_end_idx to current edge_end_idx-1.
-        auto end_it = neighbor_path_.begin() + (edge_end_idx - 1);
+        auto end_it = neighbor.begin() + (edge_end_idx - 1);
 
         // As std::reverse(first,last) reverses [first,last), end_it needs to be incremented by one in order to be part of the reverse
         std::reverse(start_it, end_it + 1);
       }
 
       // update start iterator
-      start_it = neighbor_path_.begin() + edge_end_idx;
+      start_it = neighbor.begin() + edge_end_idx;
     }
 
 
     // check for each edge (simpler than first extracting the new edges as reverse might also change the costs),
     // if it is valid (costs != -1 and costs != DBL_MAX)
     indices_valid = true;
-    for (int i = 1; i < neighbor_path_.size(); ++i)
+    for (int i = 1; i < neighbor.size(); ++i)
     {
-      utils::PosePair edge = {neighbor_path_[i - 1], neighbor_path_[i]};
+      utils::PosePair edge = {neighbor[i - 1], neighbor[i]};
       if (cost_map_.at(edge) < 0 || cost_map_.at(edge) == DBL_MAX)
       {
         indices_valid = false;
         ROS_WARN_STREAM("Indices invalid.");
+        neighbor = current_path_;
         break;
       }
     }
   } while (!indices_valid);
+
+  return neighbor;
 }
 
-void SimulatedAnnealingTspSolver::moveNode()
+std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap2Edges()
 {
+  return swapNEdges(2);
+}
+
+std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap3Edges()
+{
+  return swapNEdges(3);
+}
+
+
+std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::moveNode()
+{
+  std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
+
   bool indices_valid;
   int idx_to_move, idx_move_to_pos;
   do
@@ -313,9 +371,9 @@ void SimulatedAnnealingTspSolver::moveNode()
     }
 
     // get new edges after swap
-    utils::PosePair new_edges[3] = {{neighbor_path_[idx_move_to_pos - 1], neighbor_path_[idx_to_move]},
-                                    {neighbor_path_[idx_to_move],         neighbor_path_[idx_move_to_pos]},
-                                    {neighbor_path_[idx_to_move - 1],     neighbor_path_[idx_to_move + 1]}};
+    utils::PosePair new_edges[3] = {{neighbor[idx_move_to_pos - 1], neighbor[idx_to_move]},
+                                    {neighbor[idx_to_move],         neighbor[idx_move_to_pos]},
+                                    {neighbor[idx_to_move - 1],     neighbor[idx_to_move + 1]}};
 
     indices_valid = true;
     for (auto& new_edge: new_edges)
@@ -330,11 +388,13 @@ void SimulatedAnnealingTspSolver::moveNode()
   } while (!indices_valid);
 
   // get node to move and erase it
-  auto node_to_move = neighbor_path_[idx_to_move];
-  neighbor_path_.erase(neighbor_path_.begin() + idx_to_move);
+  auto node_to_move = neighbor[idx_to_move];
+  neighbor.erase(neighbor.begin() + idx_to_move);
 
   // insert node at new position
-  neighbor_path_.insert(neighbor_path_.begin() + idx_move_to_pos, node_to_move);
+  neighbor.insert(neighbor.begin() + idx_move_to_pos, node_to_move);
+
+  return neighbor;
 }
 
 

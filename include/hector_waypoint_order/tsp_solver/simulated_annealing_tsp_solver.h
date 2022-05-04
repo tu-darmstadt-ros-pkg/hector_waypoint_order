@@ -28,26 +28,31 @@ private:
 
   /**
    * picks a random neighbor
-   * @return true, if neighbor was not checked yet, false otherwise
+   * @return neighbor costs
    */
-  void pickRandomNeighbor();
+  double pickRandomNeighbor();
 
 
   /**
    * Neighbor generation method (mutator): swap two nodes
    */
-  void swap2Nodes();
+  std::vector<geometry_msgs::PoseStamped> swap2Nodes();
 
   /**
    * Neighbor generation method (mutator): swap n edges
    * @param n number of edges to swap
    */
-  void swapNEdges(int n);
+  std::vector<geometry_msgs::PoseStamped> swapNEdges(int n);
+
+  std::vector<geometry_msgs::PoseStamped> swap2Edges();
+  std::vector<geometry_msgs::PoseStamped> swap3Edges();
+
+
 
   /**
    * Neighbor generation method (mutator): move one node to another position (no swap!)
    */
-  void moveNode();
+  std::vector<geometry_msgs::PoseStamped> moveNode();
 
 
   double computeProbabilityForAcceptingNeighbor(double current_path_costs, double neighbor_path_costs);
@@ -64,8 +69,6 @@ private:
 
   std::vector<geometry_msgs::PoseStamped> neighbor_path_;
 
-  int num_waypoints_;
-
   double temperature_;
 
   std::mt19937 probability_gen_;
@@ -76,6 +79,18 @@ private:
 
   nav_msgs::Path current_path_msg_;
   ros::Publisher current_path_pub_;
+
+
+  typedef std::function<std::vector<geometry_msgs::PoseStamped>(SimulatedAnnealingTspSolver&)> Mutator;
+  std::map<int, Mutator> mutators_;
+
+  bool use_best_mutator_;
+
+  const int MOVE_NODE = 0;
+  const int SWAP_2_NODES = 1;
+  const int SWAP_2_EDGES = 2;
+  const int SWAP_3_EDGES = 3;
+
 
 
   // statistics
