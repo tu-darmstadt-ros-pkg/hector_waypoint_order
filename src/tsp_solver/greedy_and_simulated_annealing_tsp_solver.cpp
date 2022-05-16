@@ -23,7 +23,7 @@ std::vector<geometry_msgs::PoseStamped> GreedyAndSimulatedAnnealingTspSolver::co
   auto greedy_result = greedy_tsp_solver_.computeWaypointOrder();
 
   // TEMPORARY sleep
-  sleep(2);
+//  sleep(2);
 
   simulated_annealing_tsp_solver_.setInitialPath(greedy_result);
 
@@ -31,6 +31,8 @@ std::vector<geometry_msgs::PoseStamped> GreedyAndSimulatedAnnealingTspSolver::co
   path_ = simulated_annealing_tsp_solver_.computeWaypointOrder();
 
   path_costs_ = simulated_annealing_tsp_solver_.getPathCosts();
+
+  num_steps_last_change_ = simulated_annealing_tsp_solver_.getNumStepsOfLastChange();
 
   return path_;
 }

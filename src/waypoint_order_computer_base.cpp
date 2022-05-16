@@ -19,6 +19,8 @@ WaypointOrderComputerBase::initialize(ros::NodeHandle& nh, std::vector<geometry_
   cost_map_ = std::move(cost_map);
 
   path_costs_ = 0;
+  path_.clear();
+  num_steps_last_change_ = 0;
 
   publish_path_ = nh_.param("publish_path", false);
 
@@ -42,6 +44,13 @@ double WaypointOrderComputerBase::getPathCosts()
 
   return path_costs_;
 }
+
+
+int WaypointOrderComputerBase::getNumStepsOfLastChange()
+{
+  return num_steps_last_change_;
+}
+
 
 double WaypointOrderComputerBase::computePathCosts(std::vector<geometry_msgs::PoseStamped> path, double max_costs)
 {

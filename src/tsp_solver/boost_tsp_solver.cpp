@@ -12,6 +12,8 @@ void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::
 {
   WaypointOrderComputerBase::initialize(nh, waypoints_unordered, cost_map);
 
+  graph_.clear();
+
   // add all vertices
   for (int i = 0; i < waypoints_unordered_.size(); ++i)
   {
@@ -29,7 +31,18 @@ void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::
       // get vertex j
       Graph::vertex_descriptor vertex_j = vertex(j, graph_);
 
-      auto costs = cost_map_.at({waypoints_unordered_.at(i), waypoints_unordered_.at(j)});
+      double costs;
+      try
+      {
+        costs = cost_map_.at({waypoints_unordered_.at(i), waypoints_unordered_.at(j)});
+      }
+      catch (std::exception& e)
+      {
+        throw std::runtime_error("Error in Boost TSP solver: cost map has no entry for {" +
+                                 utils::to_string(waypoints_unordered_.at(i).pose.position) + ", " +
+                                 utils::to_string(waypoints_unordered_.at(j).pose.position) + "}.");
+      }
+
 
       if (costs == -1)
       {

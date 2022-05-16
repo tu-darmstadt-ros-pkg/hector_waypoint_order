@@ -70,6 +70,7 @@ private:
   std::vector<geometry_msgs::PoseStamped> neighbor_path_;
 
   double temperature_;
+  double cooling_rate_;
 
   std::mt19937 probability_gen_;
   std::uniform_real_distribution<> probability_dis_;
@@ -85,6 +86,8 @@ private:
   std::map<int, Mutator> mutators_;
 
   bool use_best_mutator_;
+
+  int max_tries_ = 1000;
 
   const int MOVE_NODE = 0;
   const int SWAP_2_NODES = 1;

@@ -18,6 +18,12 @@ static long fact(int n)
 }
 
 
+static std::string to_string(const geometry_msgs::Point& p)
+{
+  return "(" + std::to_string(p.x) + ", " + std::to_string(p.y) + ", " + std::to_string(p.z) + ")";
+}
+
+
 using PosePair = std::pair<geometry_msgs::PoseStamped, geometry_msgs::PoseStamped>;
 
 /**

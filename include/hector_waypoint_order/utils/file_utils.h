@@ -39,6 +39,26 @@ static void writeVectorInFile(std::string file_name, std::vector<T> data)
 }
 
 
+
+template<typename T1, typename T2>
+static void writeVectorInFile(std::string file_name, std::vector<std::pair<T1, T2>> data)
+{
+  // if file name is not absolute, complete it
+  file_name = (file_name[0] == '/') ? file_name : ros::package::getPath(ROS_PACKAGE_NAME) + "/data" + "/" + file_name;
+
+  ROS_INFO_STREAM("Try to write statistics in file " << file_name);
+
+  std::ofstream output_file(file_name);
+
+  for(auto& element: data)
+  {
+    output_file << element.first << " " << element.second << std::endl;
+  }
+}
+
+
+
+
 static void
 writeWaypointsAndCostMapToFile(const std::string& file_name, const std::vector<geometry_msgs::PoseStamped>& waypoints,
                                const CostMap& cost_map)

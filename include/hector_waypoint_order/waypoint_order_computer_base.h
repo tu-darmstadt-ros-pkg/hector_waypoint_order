@@ -38,6 +38,12 @@ public:
    */
   double getPathCosts();
 
+
+  /**
+   * Get the number of steps that were required until there was no change of the best solution.
+   */
+   int getNumStepsOfLastChange();
+
 protected:
 
   /**
@@ -56,6 +62,8 @@ protected:
 
   std::vector<geometry_msgs::PoseStamped> path_;
   double path_costs_;
+
+  int num_steps_last_change_;
 
   ros::NodeHandle nh_;
 

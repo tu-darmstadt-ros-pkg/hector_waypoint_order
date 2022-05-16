@@ -21,8 +21,8 @@ void SimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
   current_path_ = waypoints_unordered_;
   current_path_.push_back(current_path_[0]);
 
-  // TODO set appropriate initial temperature (evaluate to find best and maybe get from parameter server?)
-  temperature_ = 5;
+  temperature_ = nh_.param("initial_temperature", 5);
+  cooling_rate_ = nh_.param("cooling_rate", 0.99);
 
 
   // initialize random generators
@@ -50,6 +50,17 @@ void SimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
   mutators_[SWAP_3_EDGES] = &SimulatedAnnealingTspSolver::swap3Edges;
 
   use_best_mutator_ = nh_.param("use_best_mutator", true);
+
+
+  // reset statistics
+  accepted_path_costs_statistics_.clear();
+  temperature_statistics_.clear();
+  all_path_costs_statistics_.clear();
+  for (int i = 0; i < 4; i++)
+  {
+    mutator_accepted_statistics_[i] = 0;
+    mutator_statistics_[i] = 0;
+  }
 }
 
 
@@ -62,8 +73,12 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
   accepted_path_costs_statistics_.push_back(current_path_costs);
   publishCurrentPath();
 
-  // TEMPORARY sleep after visualization of initial solution
-  sleep(1);
+  // TEMPORARY sleep after visualization of initial solution (only when publish path)
+  if (publish_path_)
+  {
+    ros::Duration d(1);
+    d.sleep();
+  }
 
   // set current best solution
   path_ = current_path_;
@@ -90,9 +105,10 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
     if (neighbor_path_costs < current_path_costs || probability_dis_(probability_gen_) < probability_accept_neighbor)
     {
       // TEMPORARY print
-      ROS_INFO_STREAM(
-        "Accepted neighbor path costs: " << neighbor_path_costs << ", current path costs: " << current_path_costs
-                                         << ", probability: " << probability_accept_neighbor << ", used mutator: " << used_mutator_);
+//      ROS_INFO_STREAM(
+//        "Accepted neighbor path costs: " << neighbor_path_costs << ", current path costs: " << current_path_costs
+//                                         << ", probability: " << probability_accept_neighbor << ", used mutator: "
+//                                         << used_mutator_);
 
       current_path_ = neighbor_path_;
       current_path_costs = neighbor_path_costs;
@@ -110,13 +126,18 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
       {
         path_ = current_path_;
         path_costs_ = current_path_costs;
-        ROS_WARN_STREAM("Current path is shortest. Costs: " << path_costs_);
+        // TEMPORARY print
+//        ROS_WARN_STREAM("Current path is shortest. Costs: " << path_costs_);
         publishPath();
+        num_steps_last_change_ = step;
       }
 
-      // TEMPORARY sleep
-      ros::Duration d(0.25);
-      d.sleep();
+      // TEMPORARY sleep only when publish path
+      if (publish_path_)
+      {
+        ros::Duration d(0.25);
+        d.sleep();
+      }
     }
 
     // update temperature (in all steps not only when accepted)
@@ -127,26 +148,26 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
 
 
   // TEMPORARY write statistics to file
-  writeStatisticsToFile();
+//  writeStatisticsToFile();
 
   double sum_generated = std::accumulate(std::begin(mutator_statistics_), std::end(mutator_statistics_), 0);
 
   // TEMPORARY statistics print
-  ROS_INFO_STREAM("Generated mutators:\n"
-                    << "move node:    " << mutator_statistics_[MOVE_NODE] / sum_generated << "%\n"
-                    << "swap 2 nodes: " << mutator_statistics_[SWAP_2_NODES] / sum_generated << "%\n"
-                    << "swap 2 edges: " << mutator_statistics_[SWAP_2_EDGES] / sum_generated << "%\n"
-                    << "swap 3 edges: " << mutator_statistics_[SWAP_3_EDGES] / sum_generated << "%\n");
-
-  double sum_accepted = std::accumulate(std::begin(mutator_accepted_statistics_),
-                                        std::end(mutator_accepted_statistics_), 0);
+//  ROS_INFO_STREAM("Generated mutators:\n"
+//                    << "move node:    " << mutator_statistics_[MOVE_NODE] / sum_generated << "%\n"
+//                    << "swap 2 nodes: " << mutator_statistics_[SWAP_2_NODES] / sum_generated << "%\n"
+//                    << "swap 2 edges: " << mutator_statistics_[SWAP_2_EDGES] / sum_generated << "%\n"
+//                    << "swap 3 edges: " << mutator_statistics_[SWAP_3_EDGES] / sum_generated << "%\n");
+//
+//  double sum_accepted = std::accumulate(std::begin(mutator_accepted_statistics_),
+//                                        std::end(mutator_accepted_statistics_), 0);
 
   // TEMPORARY statistics print
-  ROS_INFO_STREAM("Accepted neighbors with mutator:\n"
-                    << "move node:    " << mutator_accepted_statistics_[MOVE_NODE] / sum_accepted << "%\n"
-                    << "swap 2 nodes: " << mutator_accepted_statistics_[SWAP_2_NODES] / sum_accepted << "%\n"
-                    << "swap 2 edges: " << mutator_accepted_statistics_[SWAP_2_EDGES] / sum_accepted << "%\n"
-                    << "swap 3 edges: " << mutator_accepted_statistics_[SWAP_3_EDGES] / sum_accepted << "%\n");
+//  ROS_INFO_STREAM("Accepted neighbors with mutator:\n"
+//                    << "move node:    " << mutator_accepted_statistics_[MOVE_NODE] / sum_accepted << "%\n"
+//                    << "swap 2 nodes: " << mutator_accepted_statistics_[SWAP_2_NODES] / sum_accepted << "%\n"
+//                    << "swap 2 edges: " << mutator_accepted_statistics_[SWAP_2_EDGES] / sum_accepted << "%\n"
+//                    << "swap 3 edges: " << mutator_accepted_statistics_[SWAP_3_EDGES] / sum_accepted << "%\n");
 
 
   // path was set in loop as best ever seen solution
@@ -180,6 +201,12 @@ double SimulatedAnnealingTspSolver::pickRandomNeighbor()
     for (auto& mutator: mutators_)
     {
       candidate = mutator.second(*this);
+
+      // if no valid candidate could be found (e.g. swap 3 edges with less than 9 edges does not work), continue with next mutator
+      if (candidate.empty())
+      {
+        continue;
+      }
       candidate_costs = computePathCosts(candidate);
 
       if (candidate_costs < neighbor_costs)
@@ -209,7 +236,7 @@ double SimulatedAnnealingTspSolver::pickRandomNeighbor()
     probabilities[SWAP_3_EDGES] = std::make_pair(probabilities[SWAP_2_EDGES].second,
                                                  probabilities[SWAP_2_EDGES].second + prob_swap_3_edges);
 
-    if(probabilities[SWAP_3_EDGES].second != 1)
+    if (probabilities[SWAP_3_EDGES].second != 1)
     {
       throw std::invalid_argument("TSP Solver Simulated Annealing: Mutator probabilities do not sum up to 1!");
     }
@@ -237,12 +264,21 @@ double SimulatedAnnealingTspSolver::pickRandomNeighbor()
 
 std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap2Nodes()
 {
+  // if there are less than 4 nodes, nodes cannot be moved
+  if ((current_path_.size() - 1) < 4)
+  {
+    return {};
+  }
+
   std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
 
   bool indices_valid;
   int idx1, idx2;
+  int try_counter = 0;
   do
   {
+    ++try_counter;
+
     // randomly select two points in path to swap
     idx1 = neighbor_dis_(neighbor_gen_);
     idx2 = neighbor_dis_(neighbor_gen_);
@@ -269,7 +305,7 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap2Nodes(
         break;
       }
     }
-  } while (!indices_valid);
+  } while (!indices_valid && try_counter < max_tries_);
 
   // swap in order to generate neighbor
   std::swap(neighbor[idx1], neighbor[idx2]);
@@ -279,6 +315,11 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap2Nodes(
 
 std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swapNEdges(int n)
 {
+  // if TSP instance too few edges (size-1 = num. edges), no valid neighbor possible
+  if ((current_path_.size() - 1) < (2 * n + 1))
+  {
+    return {};
+  }
 
   std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
 
@@ -288,8 +329,10 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swapNEdges(
   {
     // randomly select edges in path to swap (by their end node index)
     // as a set is used here no check for duplicates is required
-    while (edge_end_node_idx.size() < n)
+    int try_counter = 0;
+    while (edge_end_node_idx.size() < n && try_counter < max_tries_)
     {
+      ++try_counter;
       int new_idx = neighbor_dis_(neighbor_gen_);
 
       // only add new index if (new_idx-1) and (new_idx_+1) are not in list yet
@@ -353,12 +396,21 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::swap3Edges(
 
 std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::moveNode()
 {
+  // if there are less than 4 nodes, nodes cannot be moved
+  if ((current_path_.size() - 1) < 4)
+  {
+    return {};
+  }
+
   std::vector<geometry_msgs::PoseStamped> neighbor = current_path_;
 
   bool indices_valid;
   int idx_to_move, idx_move_to_pos;
+  int try_counter = 0;
   do
   {
+    ++try_counter;
+
     // randomly select one node to move and one node before that the node should be moved
     idx_to_move = neighbor_dis_(neighbor_gen_);
     idx_move_to_pos = neighbor_dis_(neighbor_gen_);
@@ -385,7 +437,7 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::moveNode()
         break;
       }
     }
-  } while (!indices_valid);
+  } while (!indices_valid && try_counter < max_tries_);
 
   // get node to move and erase it
   auto node_to_move = neighbor[idx_to_move];
@@ -412,9 +464,7 @@ double SimulatedAnnealingTspSolver::computeProbabilityForAcceptingNeighbor(doubl
 
 void SimulatedAnnealingTspSolver::computeNextTemperature()
 {
-  // TODO evaluate to find good cooling schedule (parameter server?)
-  double cooling = 0.99;
-  temperature_ = cooling * temperature_;
+  temperature_ = cooling_rate_ * temperature_;
 }
 
 void SimulatedAnnealingTspSolver::publishCurrentPath()
