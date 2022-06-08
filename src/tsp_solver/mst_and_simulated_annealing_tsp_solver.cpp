@@ -1,4 +1,4 @@
-#include "hector_waypoint_order/tsp_solver/greedy_and_simulated_annealing_tsp_solver.h"
+#include "hector_waypoint_order/tsp_solver/mst_and_simulated_annealing_tsp_solver.h"
 
 
 #include <pluginlib/class_list_macros.h>
@@ -6,23 +6,23 @@
 namespace hector_waypoint_order
 {
 
-void GreedyAndSimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
-                                                      std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
-                                                      CostMap cost_map)
+void MstAndSimulatedAnnealingTspSolver::initialize(ros::NodeHandle& nh,
+                                                   std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
+                                                   CostMap cost_map)
 {
   WaypointOrderComputerBase::initialize(nh, waypoints_unordered, cost_map);
 
   // init other solvers
-  greedy_tsp_solver_.initialize(nh_, waypoints_unordered_, cost_map_);
+  mst_tsp_solver_.initialize(nh_, waypoints_unordered_, cost_map_);
   simulated_annealing_tsp_solver_.initialize(nh_, waypoints_unordered_, cost_map_);
 }
 
-std::vector<geometry_msgs::PoseStamped> GreedyAndSimulatedAnnealingTspSolver::computeWaypointOrder()
+std::vector<geometry_msgs::PoseStamped> MstAndSimulatedAnnealingTspSolver::computeWaypointOrder()
 {
   // compute solution with boost as initial path for simulated annealing
-  auto greedy_result = greedy_tsp_solver_.computeWaypointOrder();
+  auto mst_result = mst_tsp_solver_.computeWaypointOrder();
 
-  simulated_annealing_tsp_solver_.setInitialPath(greedy_result);
+  simulated_annealing_tsp_solver_.setInitialPath(mst_result);
 
   // improve solution using simulated annealing
   path_ = simulated_annealing_tsp_solver_.computeWaypointOrder();
@@ -36,6 +36,6 @@ std::vector<geometry_msgs::PoseStamped> GreedyAndSimulatedAnnealingTspSolver::co
 } // end namespace hector_waypoint_order
 
 
-PLUGINLIB_EXPORT_CLASS(hector_waypoint_order::GreedyAndSimulatedAnnealingTspSolver,
+PLUGINLIB_EXPORT_CLASS(hector_waypoint_order::MstAndSimulatedAnnealingTspSolver,
                        hector_waypoint_order::WaypointOrderComputerBase)
 

@@ -23,7 +23,8 @@ std::vector<geometry_msgs::PoseStamped> GreedyTspSolver::computeWaypointOrder()
   // randomly select a start node
   std::random_device rd;
   std::mt19937 start_node_gen = std::mt19937(rd());
-  std::uniform_int_distribution<> start_node_dist = std::uniform_int_distribution<>(0, static_cast<int>(waypoints_not_visited_.size()) - 1);
+  std::uniform_int_distribution<> start_node_dist =
+    std::uniform_int_distribution<>(0, static_cast<int>(waypoints_not_visited_.size()) - 1);
 
   int start_idx = start_node_dist(start_node_gen);
   path_.push_back(waypoints_not_visited_[start_idx]);

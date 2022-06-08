@@ -23,9 +23,9 @@ std::vector<geometry_msgs::PoseStamped> BruteForceTspSolver::computeWaypointOrde
   double min_path_costs = DBL_MAX;
 
   int permutation_counter = 0;
-  long num_permutations = utils::fact(static_cast<int>(waypoints_unordered_.size()-1));
+  long num_permutations = utils::fact(static_cast<int>(waypoints_unordered_.size() - 1));
 
-  ROS_WARN_STREAM("Permutations to check: " << num_permutations);
+  ROS_WARN_STREAM("Permutations to check ((num_waypoints - 1)!): " << num_permutations);
 
   do
   {
@@ -47,7 +47,7 @@ std::vector<geometry_msgs::PoseStamped> BruteForceTspSolver::computeWaypointOrde
     ++permutation_counter;
 
     // print progress (not after each permutation for large num_permutations!)
-    if(permutation_counter % static_cast<int>(std::ceil(static_cast<long double>(num_permutations) / 50000.0)) == 0)
+    if (permutation_counter % static_cast<int>(std::ceil(static_cast<long double>(num_permutations) / 50000.0)) == 0)
     {
       auto progress = static_cast<double>(permutation_counter / (static_cast<long double>(num_permutations) / 100.0));
       std::cout << "Brute force TSP solver: Permutations checked: " << progress << "%\r";

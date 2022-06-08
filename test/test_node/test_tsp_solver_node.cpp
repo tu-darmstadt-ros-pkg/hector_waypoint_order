@@ -3,9 +3,9 @@
 
 #include <hector_waypoint_order/waypoint_order_computer_base.h>
 
-#include <hector_waypoint_order/tsp_solver/boost_tsp_solver.h>
+#include <hector_waypoint_order/tsp_solver/mst_tsp_solver.h>
 #include <hector_waypoint_order/tsp_solver/simulated_annealing_tsp_solver.h>
-#include <hector_waypoint_order/tsp_solver/boost_and_simulated_annealing_tsp_solver.h>
+#include <hector_waypoint_order/tsp_solver/mst_and_simulated_annealing_tsp_solver.h>
 #include <hector_waypoint_order/tsp_solver/greedy_tsp_solver.h>
 #include <hector_waypoint_order/tsp_solver/greedy_and_simulated_annealing_tsp_solver.h>
 
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
     "hector_waypoint_order::WaypointOrderComputerBase");
 
   std::string order_computer_name = pnh.param<std::string>("waypoint_order_computer_plugin",
-                                                           "hector_waypoint_order::BoostTspSolver");
+                                                           "hector_waypoint_order::MstTspSolver");
   std::unique_ptr<WaypointOrderComputerBase> order_computer_;
   order_computer_.reset(order_computer_loader_.createUnmanagedInstance(order_computer_name));
 
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   spinner.start();
 
 
-  const bool SINGLE_EXECUTION = false;
+  const bool SINGLE_EXECUTION = true;
   if (SINGLE_EXECUTION)
   {
 
@@ -92,6 +92,8 @@ int main(int argc, char** argv)
 
     // start solver
     order_computer_->computeWaypointOrder();
+
+    ROS_INFO_STREAM("Final path costs: " << order_computer_->getPathCosts());
   }
   else
   {

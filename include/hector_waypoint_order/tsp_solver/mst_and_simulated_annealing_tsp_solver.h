@@ -1,17 +1,17 @@
-#ifndef HECTOR_WAYPOINT_ORDER_BOOST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H
-#define HECTOR_WAYPOINT_ORDER_BOOST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H
+#ifndef HECTOR_WAYPOINT_ORDER_MST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H
+#define HECTOR_WAYPOINT_ORDER_MST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H
 
 
 #include "hector_waypoint_order/waypoint_order_computer_base.h"
 
-#include "hector_waypoint_order/tsp_solver/boost_tsp_solver.h"
+#include "hector_waypoint_order/tsp_solver/mst_tsp_solver.h"
 #include "hector_waypoint_order/tsp_solver/simulated_annealing_tsp_solver.h"
 
 
 namespace hector_waypoint_order
 {
 
-class BoostAndSimulatedAnnealingTspSolver : public WaypointOrderComputerBase
+class MstAndSimulatedAnnealingTspSolver : public WaypointOrderComputerBase
 {
 public:
 
@@ -23,9 +23,9 @@ public:
 
 private:
 
-  BoostTspSolver boost_tsp_solver_;
+  MstTspSolver mst_tsp_solver_;
   SimulatedAnnealingTspSolver simulated_annealing_tsp_solver_;
 };
 } // end namespace hector_waypoint_order
 
-#endif //HECTOR_WAYPOINT_ORDER_BOOST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H
+#endif //HECTOR_WAYPOINT_ORDER_MST_AND_SIMULATED_ANNEALING_TSP_SOLVER_H

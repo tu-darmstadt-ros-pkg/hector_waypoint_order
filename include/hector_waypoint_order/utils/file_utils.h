@@ -39,7 +39,6 @@ static void writeVectorInFile(std::string file_name, std::vector<T> data)
 }
 
 
-
 template<typename T1, typename T2>
 static void writeVectorInFile(std::string file_name, std::vector<std::pair<T1, T2>> data)
 {
@@ -50,13 +49,11 @@ static void writeVectorInFile(std::string file_name, std::vector<std::pair<T1, T
 
   std::ofstream output_file(file_name);
 
-  for(auto& element: data)
+  for (auto& element: data)
   {
     output_file << element.first << " " << element.second << std::endl;
   }
 }
-
-
 
 
 static void
@@ -141,7 +138,7 @@ readWaypointsAndCostMapFromFile(const std::string& file_name, std::vector<geomet
       if (cost_map_msg != nullptr)
       {
         // add all elements of CostMapEntry list to cost map
-        for (auto& entry : cost_map_msg->cost_map)
+        for (auto& entry: cost_map_msg->cost_map)
         {
           auto result = cost_map.emplace(std::make_pair(entry.first_pose, entry.second_pose), entry.costs);
         }

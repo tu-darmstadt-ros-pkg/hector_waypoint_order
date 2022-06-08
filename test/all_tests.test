@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 
 <launch>
-  <include file="$(find hector_waypoint_order)/test/test_boost_tsp_solver.test"/>
+  <include file="$(find hector_waypoint_order)/test/test_mst_tsp_solver.test"/>
 </launch>

@@ -17,8 +17,6 @@ public:
 
   std::vector<geometry_msgs::PoseStamped> computeWaypointOrder() override;
 };
-
-
 } // end namespace hector_waypoint_order
 
 

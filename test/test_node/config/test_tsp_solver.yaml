@@ -1,16 +1,18 @@
 
 
-#waypoint_order_computer_plugin: hector_waypoint_order::SimulatedAnnealingTspSolver
-#waypoint_order_computer_plugin: hector_waypoint_order::BoostTspSolver
-#waypoint_order_computer_plugin: hector_waypoint_order::BoostAndSimulatedAnnealingTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::BruteForceTspSolver
 #waypoint_order_computer_plugin: hector_waypoint_order::GreedyTspSolver
+#waypoint_order_computer_plugin: hector_waypoint_order::MstTspSolver
+
+#waypoint_order_computer_plugin: hector_waypoint_order::SimulatedAnnealingTspSolver
 #waypoint_order_computer_plugin: hector_waypoint_order::GreedyAndSimulatedAnnealingTspSolver
-waypoint_order_computer_plugin: hector_waypoint_order::BruteForceTspSolver
+waypoint_order_computer_plugin: hector_waypoint_order::MstAndSimulatedAnnealingTspSolver
+
 
 # only used by simulated annealing: whether all mutators generate a neighbor and the best is chosen or if mutator is selected probabilistically
 use_best_mutator: true
 
-publish_path: false
+publish_path: true
 
 
 initial_temperature: 5
@@ -21,8 +23,8 @@ cooling_rate: 0.99
 
 
 #tsp_file_name: "5_tsp_waypoints_costmap.bag"
-tsp_file_name: "9_tsp_waypoints_costmap.bag"
-#tsp_file_name: "14_tsp_waypoints_costmap.bag"
+#tsp_file_name: "9_tsp_waypoints_costmap.bag"
+tsp_file_name: "14_tsp_waypoints_costmap.bag"
 #tsp_file_name: "23_tsp_waypoints_costmap.bag"
 #tsp_file_name: "66_tsp_waypoints_costmap.bag"
 #tsp_file_name: "97_tsp_waypoints_costmap.bag"

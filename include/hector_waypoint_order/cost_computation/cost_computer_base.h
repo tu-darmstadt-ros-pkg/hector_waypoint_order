@@ -31,6 +31,11 @@ public:
    */
   virtual CostMap computeCosts(std::vector<geometry_msgs::PoseStamped> waypoints) = 0;
 
+  /**
+   * If during the cost computation paths have been computed and stored in paths_, they are returned here.
+   * If paths_ is empty, a runtime error is thrown.
+   * @return paths between waypoints
+   */
   virtual const PathMap& getPaths();
 
 protected:

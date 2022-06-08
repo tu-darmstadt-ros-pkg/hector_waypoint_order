@@ -61,7 +61,7 @@ double WaypointOrderComputerBase::computePathCosts(std::vector<geometry_msgs::Po
     auto costs = cost_map_.at({path[i - 1], path[i]});
     if (costs == -1)
     {
-      // TODO how to handle path_costs -1 in getPathCosts? Now set to DBL_MAX and break afterwards.
+      // TODO how to handle path_costs -1 (= no path could be computed) in getPathCosts? Now set to DBL_MAX and break afterwards.
       path_costs = DBL_MAX;
       break;
     }

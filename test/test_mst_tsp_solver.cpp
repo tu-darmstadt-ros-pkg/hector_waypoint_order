@@ -1,5 +1,5 @@
 
-#include "hector_waypoint_order/tsp_solver/boost_tsp_solver.h"
+#include "hector_waypoint_order/tsp_solver/mst_tsp_solver.h"
 
 #include <ros/ros.h>
 #include <gtest/gtest.h>
@@ -8,7 +8,7 @@
 
 using namespace hector_waypoint_order;
 
-class BoostTspSolverTest : public ::testing::Test
+class MstTspSolverTest : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -79,9 +79,9 @@ protected:
 };
 
 
-TEST_F(BoostTspSolverTest, SmallTest)
+TEST_F(MstTspSolverTest, SmallTest)
 {
-  BoostTspSolver solver;
+  MstTspSolver solver;
 
   ros::NodeHandle nh;
   solver.initialize(nh, waypoints_unordered_, cost_map_);
@@ -101,7 +101,7 @@ TEST_F(BoostTspSolverTest, SmallTest)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_boost_tsp_solver");
+  ros::init(argc, argv, "test_mst_tsp_solver");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

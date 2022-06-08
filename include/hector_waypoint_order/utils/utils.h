@@ -10,6 +10,11 @@ namespace hector_waypoint_order
 namespace utils
 {
 
+/**
+ * Compute factorial of n (n!)
+ * @param n
+ * @return factorial of n
+ */
 static long fact(int n)
 {
   if (n == 0 || n == 1)

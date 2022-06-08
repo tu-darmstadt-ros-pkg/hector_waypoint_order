@@ -80,8 +80,8 @@ set(HEADER_FILES
 
   include/hector_waypoint_order/cost_computation/path_planner/path_planner_base.h
 
-  include/hector_waypoint_order/tsp_solver/boost_tsp_solver.h
-  include/hector_waypoint_order/tsp_solver/boost_and_simulated_annealing_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/mst_tsp_solver.h
+  include/hector_waypoint_order/tsp_solver/mst_and_simulated_annealing_tsp_solver.h
   include/hector_waypoint_order/tsp_solver/brute_force_tsp_solver.h
   include/hector_waypoint_order/tsp_solver/greedy_tsp_solver.h
   include/hector_waypoint_order/tsp_solver/greedy_and_simulated_annealing_tsp_solver.h
@@ -97,8 +97,8 @@ set(SOURCES
 
   src/cost_computation/path_planner/path_planner_base.cpp
 
-  src/tsp_solver/boost_tsp_solver.cpp
-  src/tsp_solver/boost_and_simulated_annealing_tsp_solver.cpp
+  src/tsp_solver/mst_tsp_solver.cpp
+  src/tsp_solver/mst_and_simulated_annealing_tsp_solver.cpp
   src/tsp_solver/brute_force_tsp_solver.cpp
   src/tsp_solver/greedy_tsp_solver.cpp
   src/tsp_solver/greedy_and_simulated_annealing_tsp_solver.cpp
@@ -144,8 +144,8 @@ if (CATKIN_ENABLE_TESTING)
   include_directories(${rostest_INCLUDE_DIRS})
 
   ## Add gtest based cpp test target and link libraries
-  add_rostest_gtest(test_boost_tsp_solver test/test_boost_tsp_solver.test test/test_boost_tsp_solver.cpp)
-  target_link_libraries(test_boost_tsp_solver ${PROJECT_NAME} ${rostest_LIBRARIES})
+  add_rostest_gtest(test_mst_tsp_solver test/test_mst_tsp_solver.test test/test_mst_tsp_solver.cpp)
+  target_link_libraries(test_mst_tsp_solver ${PROJECT_NAME} ${rostest_LIBRARIES})
 
 endif ()
 

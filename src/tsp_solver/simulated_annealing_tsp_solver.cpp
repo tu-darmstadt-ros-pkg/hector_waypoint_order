@@ -73,9 +73,12 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
   accepted_path_costs_statistics_.push_back(current_path_costs);
   publishCurrentPath();
 
-  // TEMPORARY sleep after visualization of initial solution (only when publish path)
+  // WARN: sleep after visualization of initial solution (only when publish path)
   if (publish_path_)
   {
+    ROS_WARN_STREAM_NAMED(ROS_PACKAGE_NAME,
+                          "Since visualization of intermediate solutions for simulated annealing is switched on,"
+                          " the execution sleeps for 0.25s after each accepted solution.");
     ros::Duration d(1);
     d.sleep();
   }
@@ -132,7 +135,7 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
         num_steps_last_change_ = step;
       }
 
-      // TEMPORARY sleep only when publish path
+      // WARN sleep after visualization of current solution (only when publish path)
       if (publish_path_)
       {
         ros::Duration d(0.25);
@@ -147,12 +150,12 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
   }
 
 
-  // TEMPORARY write statistics to file
+  //NOTE: only required for tests e.g. of new parameters etc.: write statistics to file (commented out otherwise)
 //  writeStatisticsToFile();
 
   double sum_generated = std::accumulate(std::begin(mutator_statistics_), std::end(mutator_statistics_), 0);
 
-  // TEMPORARY statistics print
+  // TEMPORARY print mutator statistics
 //  ROS_INFO_STREAM("Generated mutators:\n"
 //                    << "move node:    " << mutator_statistics_[MOVE_NODE] / sum_generated << "%\n"
 //                    << "swap 2 nodes: " << mutator_statistics_[SWAP_2_NODES] / sum_generated << "%\n"
@@ -162,12 +165,12 @@ std::vector<geometry_msgs::PoseStamped> SimulatedAnnealingTspSolver::computeWayp
 //  double sum_accepted = std::accumulate(std::begin(mutator_accepted_statistics_),
 //                                        std::end(mutator_accepted_statistics_), 0);
 
-  // TEMPORARY statistics print
 //  ROS_INFO_STREAM("Accepted neighbors with mutator:\n"
 //                    << "move node:    " << mutator_accepted_statistics_[MOVE_NODE] / sum_accepted << "%\n"
 //                    << "swap 2 nodes: " << mutator_accepted_statistics_[SWAP_2_NODES] / sum_accepted << "%\n"
 //                    << "swap 2 edges: " << mutator_accepted_statistics_[SWAP_2_EDGES] / sum_accepted << "%\n"
 //                    << "swap 3 edges: " << mutator_accepted_statistics_[SWAP_3_EDGES] / sum_accepted << "%\n");
+
 
 
   // path was set in loop as best ever seen solution
@@ -221,7 +224,7 @@ double SimulatedAnnealingTspSolver::pickRandomNeighbor()
   {
     // mutate neighbor_path using different strategies
 
-    // TODO evaluate to find appropriate probabilities for mutator strategies (parameter server?)
+    // TODO find appropriate probabilities for mutator strategies (or get from parameter server)
     double prob_move_node = 0.25;
     double prob_swap_nodes = 0.25;
     double prob_swap_2_edges = 0.25;

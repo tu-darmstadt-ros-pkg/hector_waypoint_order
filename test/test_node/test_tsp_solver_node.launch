@@ -6,13 +6,13 @@
     <rosparam file="$(find hector_waypoint_order)/test/test_node/config/test_tsp_solver.yaml"/>
   </node>
 
-<!--
+
   <node name="rviz_test_tsp_solver" pkg="rviz" type="rviz"
         args="-d $(find hector_waypoint_order)/test/test_node/config/tsp_solver_test_node.rviz" respawn="true"/>
 
   <node name="pcd_to_pointcloud" pkg="pcl_ros" type="pcd_to_pointcloud" args="$(find hector_waypoint_order)/test/test_node/data/model.pcd 2" respawn="true">
     <param name="frame_id" value="building"/>
   </node>
--->
+
 
 </launch>

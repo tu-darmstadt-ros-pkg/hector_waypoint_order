@@ -1,4 +1,4 @@
-#include "hector_waypoint_order/tsp_solver/boost_tsp_solver.h"
+#include "hector_waypoint_order/tsp_solver/mst_tsp_solver.h"
 
 #include <boost/graph/metric_tsp_approx.hpp>
 
@@ -7,8 +7,8 @@
 namespace hector_waypoint_order
 {
 
-void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
-                                CostMap cost_map)
+void MstTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::PoseStamped> waypoints_unordered,
+                              CostMap cost_map)
 {
   WaypointOrderComputerBase::initialize(nh, waypoints_unordered, cost_map);
 
@@ -38,7 +38,7 @@ void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::
       }
       catch (std::exception& e)
       {
-        throw std::runtime_error("Error in Boost TSP solver: cost map has no entry for {" +
+        throw std::runtime_error("Error in MST TSP solver: cost map has no entry for {" +
                                  utils::to_string(waypoints_unordered_.at(i).pose.position) + ", " +
                                  utils::to_string(waypoints_unordered_.at(j).pose.position) + "}.");
       }
@@ -59,7 +59,7 @@ void BoostTspSolver::initialize(ros::NodeHandle& nh, std::vector<geometry_msgs::
 }
 
 
-std::vector<geometry_msgs::PoseStamped> BoostTspSolver::computeWaypointOrder()
+std::vector<geometry_msgs::PoseStamped> MstTspSolver::computeWaypointOrder()
 {
 
   // resize result vector
@@ -95,4 +95,4 @@ std::vector<geometry_msgs::PoseStamped> BoostTspSolver::computeWaypointOrder()
 } // end namespace hector_waypoint_order
 
 
-PLUGINLIB_EXPORT_CLASS(hector_waypoint_order::BoostTspSolver, hector_waypoint_order::WaypointOrderComputerBase)
+PLUGINLIB_EXPORT_CLASS(hector_waypoint_order::MstTspSolver, hector_waypoint_order::WaypointOrderComputerBase)

@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-  <test test-name="test_boost_tsp_solver" pkg="hector_waypoint_order" type="test_boost_tsp_solver"/>
-</launch>

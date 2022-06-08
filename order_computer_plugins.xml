@@ -1,5 +1,5 @@
 <library path="lib/libhector_waypoint_order">
-  <class type="hector_waypoint_order::BoostTspSolver"
+  <class type="hector_waypoint_order::MstTspSolver"
          base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
     <description>Uses the boost graph library to solve the TSP for computing the waypoint order.</description>
   </class>
@@ -18,7 +18,7 @@
          base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
     <description>Uses simulated annealing to solve the TSP for computing the waypoint order.</description>
   </class>
-  <class type="hector_waypoint_order::BoostAndSimulatedAnnealingTspSolver"
+  <class type="hector_waypoint_order::MstAndSimulatedAnnealingTspSolver"
          base_class_type="hector_waypoint_order::WaypointOrderComputerBase">
     <description>Uses the boost graph library to solve the TSP and uses this solution as initial path for simulated
       annealing to improve the boost solution for computing the waypoint order.

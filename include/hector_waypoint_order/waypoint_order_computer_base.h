@@ -16,7 +16,7 @@ public:
 
   /**
    * Initialize the waypoint order computation.
-   * @param nh
+   * @param nh NodeHandle in whose namespace the parameters are located.
    * @param waypoints_unordered Unordered list containing all waypoints.
    * @param cost_map Cost map for the points in waypoints_unordered. See CostComputerBase::computeCosts for details.
    */
@@ -42,7 +42,7 @@ public:
   /**
    * Get the number of steps that were required until there was no change of the best solution.
    */
-   int getNumStepsOfLastChange();
+  int getNumStepsOfLastChange();
 
 protected:
 
@@ -54,6 +54,9 @@ protected:
    */
   double computePathCosts(std::vector<geometry_msgs::PoseStamped> path, double max_costs = DBL_MAX);
 
+  /**
+   * Publish path_ on topic "waypoint_order_computer_path" (only if publish_path_ is true).
+   */
   void publishPath();
 
   std::vector<geometry_msgs::PoseStamped> waypoints_unordered_;

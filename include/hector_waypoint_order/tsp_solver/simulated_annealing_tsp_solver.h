@@ -35,33 +35,57 @@ private:
 
   /**
    * Neighbor generation method (mutator): swap two nodes
+   * @return neighbor of current_path_
    */
   std::vector<geometry_msgs::PoseStamped> swap2Nodes();
 
   /**
    * Neighbor generation method (mutator): swap n edges
    * @param n number of edges to swap
+   * @return neighbor of current_path_
    */
   std::vector<geometry_msgs::PoseStamped> swapNEdges(int n);
 
+  /**
+   * See swapNEdges.
+   * @return neighbor of current_path_
+   */
   std::vector<geometry_msgs::PoseStamped> swap2Edges();
-  std::vector<geometry_msgs::PoseStamped> swap3Edges();
 
+  /**
+   * See swapNEdges.
+   * @return neighbor of current_path_
+   */
+  std::vector<geometry_msgs::PoseStamped> swap3Edges();
 
 
   /**
    * Neighbor generation method (mutator): move one node to another position (no swap!)
+   * @return neighbor of current_path_
    */
   std::vector<geometry_msgs::PoseStamped> moveNode();
 
 
+  /**
+   * Computes the probability for accepting a worse neighbor based on the temperture_ and the costs of the current and the neighbor path.
+   * If neighbor is better, this is always 1.
+   * @param current_path_costs
+   * @param neighbor_path_costs
+   * @return
+   */
   double computeProbabilityForAcceptingNeighbor(double current_path_costs, double neighbor_path_costs);
 
+  /**
+   * Compute next temperature based on current temperature and cooling schedule / cooling_rate_
+   */
   void computeNextTemperature();
 
 
   void publishCurrentPath();
 
+  /**
+   * Only required for tests. Write statistics about the accepted path costs, all path costs and the temperatures to a file.
+   */
   void writeStatisticsToFile();
 
 
@@ -93,7 +117,6 @@ private:
   const int SWAP_2_NODES = 1;
   const int SWAP_2_EDGES = 2;
   const int SWAP_3_EDGES = 3;
-
 
 
   // statistics
