@@ -6,7 +6,7 @@ This package implements functionality to compute the optimal waypoint order e.g.
 
 ## Cost computer
 
-For computing the waypoint order costs between the waypoints are required. Therefore, a base class
+For computing the waypoint order, costs between the waypoints are required. Therefore, a base class
 called `CostComputerBase` is implemented. Subclasses provide different ways of computing costs and are implemented as
 plugins.
 
@@ -54,5 +54,5 @@ intermediate results are published on the topic `waypoint_order_computer_path` (
 | Name                  | Description                                                                                                            | Default value |
 |-----------------------|------------------------------------------------------------------------------------------------------------------------|---------------|
 | `initial_temperature` | Initial temperature for SA algorithm. Needs to be > 0.                                                                 | 5             |
-| `cooling_rate`        | In range (0,1). Temperature is adapted in each iteration by the factor given in the cooling_rate                       | 0.99          |
+| `cooling_rate`        | In range (0,1). Temperature is adapted in each iteration by the factor given in the cooling_rate.                      | 0.99          |
 | `use_best_mutator`    | Always use the mutator which currently generates the best neighbor. If false, the mutator is chosen probabilistically. | true          |
