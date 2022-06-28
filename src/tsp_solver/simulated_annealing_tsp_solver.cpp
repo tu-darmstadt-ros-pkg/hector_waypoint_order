@@ -186,6 +186,9 @@ void SimulatedAnnealingTspSolver::setInitialPath(std::vector<geometry_msgs::Pose
   {
     current_path_.push_back(current_path_[0]);
   }
+
+  // if current_path_ is shorter (e.g. due to unreachable points) update random generator!
+  neighbor_dis_ = std::uniform_int_distribution<>(1, static_cast<int>(current_path_.size()) - 2);
 }
 
 
@@ -477,7 +480,10 @@ void SimulatedAnnealingTspSolver::publishCurrentPath()
     return;
   }
 
+
+  current_path_msg_.header.frame_id = current_path_[0].header.frame_id;
   current_path_msg_.header.stamp = ros::Time::now();
+
   current_path_msg_.poses = current_path_;
 
   current_path_pub_.publish(current_path_msg_);
